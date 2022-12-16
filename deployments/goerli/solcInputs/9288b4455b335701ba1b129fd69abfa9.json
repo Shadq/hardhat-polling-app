@@ -1,0 +1,35 @@
+{
+  "language": "Solidity",
+  "sources": {
+    "contracts/PollingSystem.sol": {
+      "content": "// SPDX-License-Identifier: MIT\npragma solidity ^0.8.7;\n\ncontract PollingSystem {\n    constructor() {\n        Voter memory newVoter = Voter({\n            voterAddress: msg.sender,\n            timesVoted: 0\n        });\n        voters[newVoter.voterAddress] = newVoter;\n    }\n\n    struct Poll {\n        address pollCreator;\n        uint votes;\n        string idea;\n        uint pollID;\n    }\n    struct Poller {\n        address pollerAddress;\n    }\n    struct Voter {\n        address voterAddress;\n        uint timesVoted;\n    }\n\n    mapping(string => Poll) public polls;\n    mapping(address => Poller) public pollers;\n    mapping(address => Voter) public voters;\n\n    function becomePoller() public {\n        require(\n            pollers[msg.sender].pollerAddress != msg.sender,\n            \"You are already a poller\"\n        );\n        Poller memory newPoller = Poller({pollerAddress: msg.sender});\n        pollers[newPoller.pollerAddress] = newPoller;\n    }\n\n    function createPoll(string memory _idea) public {\n        require(\n            pollers[msg.sender].pollerAddress == msg.sender,\n            \"You have to be a poller to create one\"\n        );\n        uint id;\n        id++;\n        Poll memory newPoll = Poll({\n            pollCreator: msg.sender,\n            votes: 0,\n            idea: _idea,\n            pollID: id\n        });\n        polls[newPoll.idea] = newPoll;\n    }\n\n    function vote(string memory _idea) public {\n        Poll storage poll = polls[_idea];\n        Voter storage voter = voters[msg.sender];\n        require(\n            poll.pollCreator != msg.sender,\n            \"You cannot vote your own poll!\"\n        );\n        require(voter.timesVoted == 0, \"You cannot vote twice!\");\n\n        poll.votes++;\n        voter.timesVoted++;\n    }\n}\n"
+    }
+  },
+  "settings": {
+    "optimizer": {
+      "enabled": false,
+      "runs": 200
+    },
+    "outputSelection": {
+      "*": {
+        "*": [
+          "abi",
+          "evm.bytecode",
+          "evm.deployedBytecode",
+          "evm.methodIdentifiers",
+          "metadata",
+          "devdoc",
+          "userdoc",
+          "storageLayout",
+          "evm.gasEstimates"
+        ],
+        "": [
+          "ast"
+        ]
+      }
+    },
+    "metadata": {
+      "useLiteralContent": true
+    }
+  }
+}
